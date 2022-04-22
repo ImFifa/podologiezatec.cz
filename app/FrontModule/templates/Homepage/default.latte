@@ -104,53 +104,74 @@
 			<div class="contact-form">
 				<h3>Napište nám</h3>
 
-				{foreach $flashes as $flash}
-					<div class="alert alert-{$flash->type} alert-dismissible fade show" style="max-width: 500px" role="alert">
-						{$flash->message}
-						<button type="button" class="close" data-dismiss="alert" aria-label="Close">
-							<span aria-hidden="true">&times;</span>
-						</button>
-					</div>
-				{/foreach}
-
-				{form contactForm, class => 'row'}
-					<div class="col-lg-12">
-						<div class="form-group">
-							{label name}{/label}
-								{input name class => 'form-control, required'}
+				{snippet contactFlashes}
+					{foreach $flashes as $flash}
+						<div class="alert alert-{$flash->type} alert-dismissible fade show" style="max-width: 500px" role="alert">
+							{$flash->message}
 						</div>
-					</div>
+					{/foreach}
+				{/snippet}
 
-					<div class="col-lg-6">
-						<div class="form-group">
-							{label phone}{/label}
-								{input phone class => 'form-control, required'}
+				{snippet contactForm}
+					{form contactForm, class => 'row'}
+						{input protiBotum}
+						<div class="col-lg-12">
+							<div class="form-group">
+								{label name}{/label}
+									{input name class => 'form-control, required'}
+							</div>
 						</div>
-					</div>
 
-					<div class="col-lg-6">
-						<div class="form-group">
-							{label email}{/label}
-								{input email class => 'form-control, required'}
+						<div class="col-lg-6">
+							<div class="form-group">
+								{label phone}{/label}
+									{input phone class => 'form-control, required'}
+							</div>
 						</div>
-					</div>
 
-					<div class="col-lg-12">
-						<div class="form-group">
-							{label message}{/label}
-								{input message class => 'form-control, required', rows => 5}
+						<div class="col-lg-6">
+							<div class="form-group">
+								{label email}{/label}
+									{input email class => 'form-control, required'}
+							</div>
 						</div>
-					</div>
 
-					<div class="col-lg-6">
-						<div class="form-group">
-							<button n:name="submit" class="btn btn-lg btn-primary submit">
-								Odeslat
-							</button>
+						<div class="col-lg-12">
+							<div class="form-group">
+								{label message}{/label}
+									{input message class => 'form-control, required', rows => 5}
+							</div>
 						</div>
-					</div>
-				{/form}
+
+						<div class="col-lg-6">
+							<div class="form-group d-inline-flex align-items-center">
+								<div class="spinner-border spinner-contact mr-3" style="display: none;" role="status">
+									<span class="sr-only">Loading...</span>
+								</div>
+								{input submit class => 'btn ajax submit submit-contactForm'}
+							</div>
+						</div>
+					{/form}
+				{/snippet}
 			</div>
 		</div>
 	</section>
+{/block}
+
+
+{block #scripts}
+	<script type="application/javascript">
+		var contactForm = document.querySelector('#frm-contactForm');
+		var submitContact = contactForm.querySelector('.submit-contactForm');
+		var spinnerContact = contactForm.querySelector('.spinner-contact');
+
+		submitContact.addEventListener('click', () => {
+			submitContact.disabled = true;
+			spinnerContact.style.display = 'block';
+			setTimeout(() => {
+				submitContact.disabled = false;
+				spinnerContact.style.display = 'none';
+			}, 3000);
+		});
+	</script>
 {/block}

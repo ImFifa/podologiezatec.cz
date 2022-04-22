@@ -489,6 +489,10 @@ textarea {
 	.submit {
 		width: 100%;
 		max-width: 250px;
+		padding: 1rem 2rem;
+		font-size: 1.1rem;
+		background-color: $primary;
+		color: $white;
 	}
 }
 

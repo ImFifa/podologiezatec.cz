@@ -7,6 +7,7 @@ use K2D\News\Models\NewModel;
 use Nette\Application\UI\Form;
 use Nette\Database\DriverException;
 use Nette\Mail\Message;
+use Nette\Mail\SmtpException;
 use Nette\Mail\SmtpMailer;
 use Nette\Neon\Neon;
 
@@ -36,6 +37,8 @@ class HomepagePresenter extends BasePresenter
 	{
 		$form = new Form();
 
+        $form->addHidden('protiBotum');
+
 		$form->addText('name', 'Jméno a příjmení')
 			->addRule(Form::MAX_LENGTH, 'Maximálné délka je %s znaků', 120)
 			->setRequired('Musíte uvést Vaše jméno a příjmení');
@@ -50,47 +53,51 @@ class HomepagePresenter extends BasePresenter
 		$form->addTextArea('message', 'Zpráva')
 			->addRule($form::MAX_LENGTH, 'Zpráva je příliš dlouhá', 10000);
 
-		$form->addInvisibleReCaptcha('recaptcha')
-			->setMessage('Jste opravdu člověk?');
-
 		$form->addSubmit('submit', 'Odeslat');
 
 		$form->onSubmit[] = function (Form $form) {
 			try {
 				$values = $form->getValues(true);
 
-				if (!empty($values)) {
-					$mail = new Message();
+                if ($values['protiBotum'] === "") {
+                    $mail = new Message();
 
-					$vars = $this->configuration->getAllVars();
-					if (isset($vars['email']))
-						$ownersEmail = $vars['email'];
-					else
-						$ownersEmail = 'fifa.urban@gmail.com';
+                        $vars = $this->configuration->getAllVars();
+                        if (isset($vars['email']))
+                            $ownersEmail = $vars['email'];
+                        else
+                            $ownersEmail = 'fifa.urban@gmail.com';
 
-					$mail->setFrom($values['email'], $values['name'])
-						->addTo($ownersEmail)
-						->setSubject('Podologie Žatec - zpráva z formuláře na webu')
-						->setBody($values['message']);
+                    $mail->setFrom($values['email'], $values['name'])
+                        ->addTo($ownersEmail)
+                        ->setSubject('Podologie Žatec - zpráva z formuláře na webu')
+                        ->setBody($values['message']);
 
-					$parameters = Neon::decode(file_get_contents(__DIR__ . "/../../config/server/local.neon"));
+                    $parameters = Neon::decode(file_get_contents(__DIR__ . "/../../config/server/local.neon"));
 
-					$mailer = new SmtpMailer([
-						'host' => $parameters['mail']['host'],
-						'username' => $parameters['mail']['username'],
-						'password' => $parameters['mail']['password'],
-						'secure' => $parameters['mail']['secure'],
-					]);
+                    $mailer = new SmtpMailer([
+                        'host' => $parameters['mail']['host'],
+                        'username' => $parameters['mail']['username'],
+                        'password' => $parameters['mail']['password'],
+                        'secure' => $parameters['mail']['secure'],
+                    ]);
 
-					$mailer->send($mail);
-				}
+                    $mailer->send($mail);
+                    $this->flashMessage('Email byl úspěšně odeslán!', 'success');
+                } else {
+                    $this->flashMessage('Boti nic posílat nesmějí!', 'danger');
+                }
 
-				$this->flashMessage('Email byl úspěšně odeslán!');
-				$this->redirect('this#frm-contactForm');
-
-			} catch (DriverException $e) {
-				$this->flashMessage('Vaši zprávu se nepodařilo odeslat. Kontaktujte prosím správce webu na info@filipurban.cz', 'danger');
-			}
+                if ($this->isAjax()) {
+                    $this->redrawControl('contactFlashes');
+                    $this->redrawControl('contactForm');
+                    $form->setValues([], TRUE);
+                } else {
+                    $this->redirect('this#kontakt');
+                }
+            } catch (SmtpException $e) {
+                $this->flashMessage('Vaši zprávu se nepodařilo odeslat. Kontaktujte prosím správce webu na info@filipurban.cz', 'danger');
+            }
 		};
 
 		return $form;

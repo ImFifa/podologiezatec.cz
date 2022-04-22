@@ -20,6 +20,3 @@ parameters:
 	admin:
 		menu:
 			Služby: [':Admin:Service:', spa]
-
-extensions:
-    recaptcha: Contributte\ReCaptcha\DI\ReCaptchaExtension

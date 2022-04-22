@@ -5,14 +5,13 @@ import "bootstrap/js/dist/collapse";
 import "bootstrap/js/dist/modal";
 import "bootstrap/js/dist/util";
 
+import naja from "naja";
+import "nette.ajax.js/nette.ajax";
+import Nette from "@/front/netteForms";
+
 import "lightbox2/dist/css/lightbox.css";
 // eslint-disable-next-line no-unused-vars
 import lightbox from "lightbox2/dist/js/lightbox";
-
-import Nette from "@/front/netteForms";
-Nette.initOnLoad();
-window.Nette = Nette;
-
 
 const $scrollTopBtn = document.querySelector("#scrollTopBtn");
 const navbar = document.querySelector(".navbar");
@@ -56,14 +55,9 @@ function runOnScroll() {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
-	// modal after registration
-	const queryString = window.location.search;
-	const urlParams = new URLSearchParams(queryString);
-	var odeslano = urlParams.get("odeslano");
-	if(odeslano){
-		$("#mailSentModal").modal("show");
-		console.log("modal is shown");
-	}
+	naja.initialize();
+	Nette.initOnLoad();
+	window.Nette = Nette;
 
 	// on scroll events
 	// eslint-disable-next-line no-undef
